@@ -33,12 +33,6 @@ import 'package:flutter/rendering.dart';
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/sliders/>
 class CupertinoRangeSlider extends StatefulWidget {
   /// Creates an iOS-style slider.
-  ///
-  /// The slider itself does not maintain any state. Instead, when the state of
-  /// the slider changes, the widget calls the [onChanged] callback. Most widgets
-  /// that use a slider will listen for the [onChanged] callback and rebuild the
-  /// slider with a new [value] to update the visual appearance of the slider.
-  ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
   const CupertinoRangeSlider({
@@ -51,6 +45,7 @@ class CupertinoRangeSlider extends StatefulWidget {
     this.max: 1.0,
     this.divisions,
     this.activeColor: CupertinoColors.activeBlue,
+    this.trackColor: const Color(0xFFB5B5B5)
   })  : assert(minValue != null),
         assert(maxValue != null),
         assert(min != null),
@@ -113,6 +108,9 @@ class CupertinoRangeSlider extends StatefulWidget {
   /// The color to use for the portion of the slider that has been selected.
   final Color activeColor;
 
+  /// The color to use for the left portions of the slider that have not been selected.
+  final Color trackColor;
+
   @override
   _CupertinoRangeSliderState createState() => new _CupertinoRangeSliderState();
 
@@ -149,6 +147,7 @@ class _CupertinoRangeSliderState extends State<CupertinoRangeSlider>
       maxValue: (widget.maxValue - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
       activeColor: widget.activeColor,
+      trackColor: widget.trackColor,
       onMinChanged: widget.onMinChanged != null ? _handleMinChanged : null,
       onMaxChanged: widget.onMaxChanged != null ? _handleMaxChanged : null,
       vsync: this,
@@ -164,6 +163,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.maxValue,
     this.divisions,
     this.activeColor,
+    this.trackColor,
     this.onMinChanged,
     this.onMaxChanged,
     this.vsync,
@@ -174,6 +174,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final double maxValue;
   final int divisions;
   final Color activeColor;
+  final Color trackColor;
   final ValueChanged<double> onMinChanged;
   final ValueChanged<double> onMaxChanged;
   final TickerProvider vsync;
@@ -185,6 +186,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       maxValue: maxValue,
       divisions: divisions,
       activeColor: activeColor,
+      trackColor: trackColor,
       onMinChanged: onMinChanged,
       onMaxChanged: onMaxChanged,
       vsync: vsync,
@@ -200,6 +202,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..maxValue = maxValue
       ..divisions = divisions
       ..activeColor = activeColor
+      ..trackColor = trackColor
       ..onMinChanged = onMinChanged
       ..onMaxChanged = onMaxChanged
       ..textDirection = Directionality.of(context);
@@ -211,13 +214,11 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 const double _kPadding = 8.0;
 const int _kMinThumb = 1;
 const int _kMaxThumb = 2;
-const Color _kTrackColor = const Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
 const Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
 
-const double _kAdjustmentUnit =
-0.1; // Matches iOS implementation of material slider.
+const double _kAdjustmentUnit = .1; // Matches iOS implementation of material slider.
 
 class _RenderCupertinoSlider extends RenderConstrainedBox {
   _RenderCupertinoSlider({
@@ -225,6 +226,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     @required double maxValue,
     int divisions,
     Color activeColor,
+    Color trackColor,
     ValueChanged<double> onMinChanged,
     ValueChanged<double> onMaxChanged,
     TickerProvider vsync,
@@ -236,11 +238,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         _maxValue = maxValue,
         _divisions = divisions,
         _activeColor = activeColor,
+        _trackColor = trackColor,
         _onMinChanged = onMinChanged,
         _onMaxChanged = onMaxChanged,
         _textDirection = textDirection,
-        super(
-          additionalConstraints: const BoxConstraints.tightFor(
+        super(additionalConstraints: const BoxConstraints.tightFor(
               width: _kSliderWidth, height: _kSliderHeight)) {
     _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
@@ -296,12 +298,21 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  Color get activeColor => _activeColor;
   Color _activeColor;
+  Color get activeColor => _activeColor;
 
   set activeColor(Color value) {
     if (value == _activeColor) return;
     _activeColor = value;
+    markNeedsPaint();
+  }
+
+  Color _trackColor;
+  Color get trackColor => _activeColor;
+
+  set trackColor(Color value) {
+    if (value == _trackColor) return;
+    _trackColor = value;
     markNeedsPaint();
   }
 
@@ -424,6 +435,18 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   @override
   bool hitTestSelf(Offset position) {
+
+    // If both thumbs are at the same place and at the start or the end
+    if (_minThumbCenter == _maxThumbCenter) {
+      if (_minThumbCenter >= size.width - (CupertinoThumbPainter.radius + _kPadding)) {
+        pickedThumb = _kMinThumb;
+        return true;
+      } else if (_minThumbCenter <= CupertinoThumbPainter.radius + _kPadding) {
+        pickedThumb = _kMaxThumb;
+        return true;
+      }
+    }
+
     if ((position.dx - _minThumbCenter).abs() <
         CupertinoThumbPainter.radius + _kPadding) {
       pickedThumb = _kMinThumb;
@@ -452,7 +475,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     //final double minVisualPosition = _minPosition.value;
     //final double maxVisualPosition = _maxPosition.value;
     final Color betweenColor = _activeColor;
-    final Color aroundColor = _kTrackColor;
+    final Color aroundColor = _trackColor;
 
     final double trackCenter = offset.dy + size.height / 2.0;
     final double trackLeft = offset.dx + _trackLeft;
