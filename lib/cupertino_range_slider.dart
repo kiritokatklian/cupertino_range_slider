@@ -121,10 +121,10 @@ class CupertinoRangeSlider extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('minValue', minValue));
-    properties.add(new DoubleProperty('maxValue', maxValue));
-    properties.add(new DoubleProperty('min', min));
-    properties.add(new DoubleProperty('max', max));
+    properties.add(DoubleProperty('minValue', minValue));
+    properties.add(DoubleProperty('maxValue', maxValue));
+    properties.add(DoubleProperty('min', min));
+    properties.add(DoubleProperty('max', max));
   }
 }
 
@@ -255,16 +255,16 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         _textDirection = textDirection,
         super(additionalConstraints: const BoxConstraints.tightFor(
               width: _kSliderWidth, height: _kSliderHeight)) {
-    _drag = new HorizontalDragGestureRecognizer()
+    _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
-    _minPosition = new AnimationController(
+    _minPosition = AnimationController(
       value: minValue,
       duration: _kDiscreteTransitionDuration,
       vsync: vsync,
     )..addListener(markNeedsPaint);
-    _maxPosition = new AnimationController(
+    _maxPosition = AnimationController(
       value: maxValue,
       duration: _kDiscreteTransitionDuration,
       vsync: vsync,
@@ -351,7 +351,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   set onMaxChanged(ValueChanged<double> value) {
     if (value == _onMaxChanged) return;
-
     final bool wasInteractive = isInteractive;
     _onMaxChanged = value;
     if (wasInteractive != isInteractive) markNeedsSemanticsUpdate();
@@ -418,7 +417,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
       _currentDragValue = pickedThumb == _kMinThumb ? _minValue : _maxValue;
-
       if (pickedThumb == _kMinThumb) {
         onMinChanged(_discretizedCurrentDragValue);
       } else {
@@ -458,10 +456,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     // If both thumbs are at the same place and at the start or the end
     if (_minThumbCenter == _maxThumbCenter) {
-      if (_minThumbCenter >= size.width - (CupertinoThumbPainter.radius + _kPadding)) {
+      if (_minThumbCenter >= (size.width - CupertinoThumbPainter.radius + _kPadding)) {
         pickedThumb = _kMinThumb;
         return true;
-      } else if (_minThumbCenter <= CupertinoThumbPainter.radius + _kPadding) {
+      } else if ((_minThumbCenter <= (CupertinoThumbPainter.radius + _kPadding)) ||
+          position.dx > _maxThumbCenter) {
         pickedThumb = _kMaxThumb;
         return true;
       }
@@ -504,32 +503,32 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     final double trackMaxActive = offset.dx + _maxThumbCenter;
 
     final Canvas canvas = context.canvas;
-    final Paint paint = new Paint();
+    final Paint paint = Paint();
 
     paint.color = aroundColor;
     canvas.drawRRect(
-        new RRect.fromLTRBXY(
-            trackLeft, trackTop, trackRight, trackBottom, 1.0, 1.0),
-        paint);
+      RRect.fromLTRBXY(
+        trackLeft, trackTop, trackRight, trackBottom, 1.0, 1.0),
+      paint);
 
     paint.color = betweenColor;
     canvas.drawRRect(
-        new RRect.fromLTRBXY(
-            trackMinActive, trackTop, trackMaxActive, trackBottom, 1.0, 1.0),
-        paint);
+      RRect.fromLTRBXY(
+        trackMinActive, trackTop, trackMaxActive, trackBottom, 1.0, 1.0),
+      paint);
 
-    final Offset minThumbCenter = new Offset(trackMinActive, trackCenter);
-    final Offset maxThumbCenter = new Offset(trackMaxActive, trackCenter);
-
-    _thumbPainter.paint(
-        canvas,
-        new Rect.fromCircle(
-            center: minThumbCenter, radius: CupertinoThumbPainter.radius));
+    final Offset minThumbCenter = Offset(trackMinActive, trackCenter);
+    final Offset maxThumbCenter = Offset(trackMaxActive, trackCenter);
 
     _thumbPainter.paint(
         canvas,
-        new Rect.fromCircle(
-            center: maxThumbCenter, radius: CupertinoThumbPainter.radius));
+        Rect.fromCircle(
+          center: minThumbCenter, radius: CupertinoThumbPainter.radius));
+
+    _thumbPainter.paint(
+        canvas,
+        Rect.fromCircle(
+          center: maxThumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override
