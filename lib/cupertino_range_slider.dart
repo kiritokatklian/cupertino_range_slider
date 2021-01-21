@@ -45,7 +45,8 @@ class CupertinoRangeSlider extends StatefulWidget {
     this.max: 1.0,
     this.divisions,
     this.activeColor: CupertinoColors.activeBlue,
-    this.trackColor: const Color(0xFFB5B5B5)
+    this.trackColor: const Color(0xFFB5B5B5),
+    this.thumbColor: const Color(0xFFFFFFFF)
   })  : assert(minValue != null),
         assert(maxValue != null),
         assert(min != null),
@@ -111,6 +112,9 @@ class CupertinoRangeSlider extends StatefulWidget {
   /// The color to use for the left portions of the slider that have not been selected.
   final Color trackColor;
 
+  /// The color to use for the left the thumb of the slider.
+  final Color thumbColor;
+
   @override
   _CupertinoRangeSliderState createState() => new _CupertinoRangeSliderState();
 
@@ -148,6 +152,7 @@ class _CupertinoRangeSliderState extends State<CupertinoRangeSlider>
       divisions: widget.divisions,
       activeColor: widget.activeColor,
       trackColor: widget.trackColor,
+      thumbColor: widget.thumbColor,
       onMinChanged: widget.onMinChanged != null ? _handleMinChanged : null,
       onMaxChanged: widget.onMaxChanged != null ? _handleMaxChanged : null,
       vsync: this,
@@ -164,6 +169,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.activeColor,
     this.trackColor,
+    this.thumbColor,
     this.onMinChanged,
     this.onMaxChanged,
     this.vsync,
@@ -175,6 +181,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final Color activeColor;
   final Color trackColor;
+  final Color thumbColor;
   final ValueChanged<double> onMinChanged;
   final ValueChanged<double> onMaxChanged;
   final TickerProvider vsync;
@@ -187,6 +194,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       activeColor: activeColor,
       trackColor: trackColor,
+      thumbColor: thumbColor,
       onMinChanged: onMinChanged,
       onMaxChanged: onMaxChanged,
       vsync: vsync,
@@ -203,6 +211,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..divisions = divisions
       ..activeColor = activeColor
       ..trackColor = trackColor
+      ..thumbColor = thumbColor
       ..onMinChanged = onMinChanged
       ..onMaxChanged = onMaxChanged
       ..textDirection = Directionality.of(context);
@@ -227,6 +236,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     int divisions,
     Color activeColor,
     Color trackColor,
+    Color thumbColor,
     ValueChanged<double> onMinChanged,
     ValueChanged<double> onMaxChanged,
     TickerProvider vsync,
@@ -239,6 +249,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         _divisions = divisions,
         _activeColor = activeColor,
         _trackColor = trackColor,
+        _thumbColor = thumbColor,
         _onMinChanged = onMinChanged,
         _onMaxChanged = onMaxChanged,
         _textDirection = textDirection,
@@ -313,6 +324,15 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   set trackColor(Color value) {
     if (value == _trackColor) return;
     _trackColor = value;
+    markNeedsPaint();
+  }
+
+  Color _thumbColor;
+  Color get thumbColor => _activeColor;
+
+  set thumbColor(Color value) {
+    if (value == _thumbColor) return;
+    _thumbColor = value;
     markNeedsPaint();
   }
 
@@ -468,12 +488,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     if (event is PointerDownEvent && isInteractive) _drag.addPointer(event);
   }
 
-  final CupertinoThumbPainter _thumbPainter = new CupertinoThumbPainter();
-
   @override
   void paint(PaintingContext context, Offset offset) {
-    //final double minVisualPosition = _minPosition.value;
-    //final double maxVisualPosition = _maxPosition.value;
+    final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter(color: _thumbColor);
     final Color betweenColor = _activeColor;
     final Color aroundColor = _trackColor;
 
@@ -482,7 +499,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     final double trackTop = trackCenter - 1.0;
     final double trackBottom = trackCenter + 1.0;
     final double trackRight = offset.dx + _trackRight;
-//    final double trackActive = offset.dx + _thumbCenter;
 
     final double trackMinActive = offset.dx + _minThumbCenter;
     final double trackMaxActive = offset.dx + _maxThumbCenter;
