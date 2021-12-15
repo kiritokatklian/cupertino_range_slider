@@ -73,15 +73,15 @@ class RangeSliderItem extends StatefulWidget {
   final ValueChanged<int> onMinValueChanged;
   final ValueChanged<int> onMaxValueChanged;
 
-  const RangeSliderItem({Key key, this.title, this.initialMinValue, this.initialMaxValue, this.onMinValueChanged, this.onMaxValueChanged}) : super(key: key);
+  const RangeSliderItem({Key? key, required this.title, required this.initialMinValue, required this.initialMaxValue, required this.onMinValueChanged, required this.onMaxValueChanged}) : super(key: key);
 
   @override
   _RangeSliderItemState createState() => _RangeSliderItemState();
 }
 
 class _RangeSliderItemState extends State<RangeSliderItem> {
-  int minValue;
-  int maxValue;
+  late int minValue;
+  late int maxValue;
 
 
   @override
@@ -104,17 +104,13 @@ class _RangeSliderItemState extends State<RangeSliderItem> {
         onMinChanged: (minVal){
           setState(() {
             minValue = minVal.round();
-            if(widget.onMinValueChanged != null) {
-              widget.onMinValueChanged(minValue);
-            }
+            widget.onMinValueChanged(minValue);
           });
         },
         onMaxChanged: (maxVal){
           setState(() {
             maxValue = maxVal.round();
-            if(widget.onMaxValueChanged != null) {
-              widget.onMaxValueChanged(maxValue);
-            }
+            widget.onMaxValueChanged(maxValue);
           });
         },
       ),
@@ -130,9 +126,9 @@ class _RangeSliderItemState extends State<RangeSliderItem> {
 class FilterItemHolder extends StatelessWidget {
   final String title;
   final String value;
-  final Widget child;
+  final Widget? child;
 
-  FilterItemHolder({Key key, this.title, this.value = '', this.child})
+  FilterItemHolder({Key? key, required this.title, this.value = '', this.child})
       : super(key: key);
 
   @override

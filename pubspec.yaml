@@ -1,11 +1,10 @@
 name: cupertino_range_slider
-description: Widget is a slider that help you to choose a range from a set of values.
-version: 1.0.1
-author: Muhammad Ahmed <mahmed8003@gmail.com>
-homepage: https://github.com/mahmed8003/cupertino_range_slider
+description: An iOS style range slider that helps with choosing a range from a set of values.
+version: 2.0.0
+homepage: https://github.com/kiritokatklian/cupertino_range_slider
 
 environment:
-  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  sdk: '>=2.15.0 <3.0.0'
 
 dependencies:
   flutter:

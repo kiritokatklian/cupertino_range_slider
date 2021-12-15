@@ -36,22 +36,18 @@ class CupertinoRangeSlider extends StatefulWidget {
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
   const CupertinoRangeSlider({
-    Key key,
-    @required this.minValue,
-    @required this.maxValue,
-    @required this.onMinChanged,
-    @required this.onMaxChanged,
+    Key? key,
+    required this.minValue,
+    required this.maxValue,
+    this.onMinChanged,
+    this.onMaxChanged,
     this.min: 0.0,
     this.max: 1.0,
     this.divisions,
     this.activeColor: CupertinoColors.activeBlue,
     this.trackColor: const Color(0xFFB5B5B5),
     this.thumbColor: const Color(0xFFFFFFFF)
-  })  : assert(minValue != null),
-        assert(maxValue != null),
-        assert(min != null),
-        assert(max != null),
-        assert(minValue >= min && maxValue <= max && minValue <= maxValue),
+  })  : assert(minValue >= min && maxValue <= max && minValue <= maxValue),
         assert(divisions == null || divisions > 0),
         super(key: key);
 
@@ -88,8 +84,8 @@ class CupertinoRangeSlider extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  final ValueChanged<double> onMinChanged;
-  final ValueChanged<double> onMaxChanged;
+  final ValueChanged<double>? onMinChanged;
+  final ValueChanged<double>? onMaxChanged;
 
   /// The minimum value the user can select.
   ///
@@ -104,7 +100,7 @@ class CupertinoRangeSlider extends StatefulWidget {
   /// The number of discrete divisions.
   ///
   /// If null, the slider is continuous.
-  final int divisions;
+  final int? divisions;
 
   /// The color to use for the portion of the slider that has been selected.
   final Color activeColor;
@@ -134,14 +130,14 @@ class _CupertinoRangeSliderState extends State<CupertinoRangeSlider>
     assert(widget.onMinChanged != null);
     final nextValue = value * (widget.max - widget.min) + widget.min;
     final v = nextValue > widget.maxValue ? widget.maxValue : nextValue;
-    widget.onMinChanged(v);
+    widget.onMinChanged!(v);
   }
 
   void _handleMaxChanged(double value) {
     assert(widget.onMaxChanged != null);
     final nextValue = value * (widget.max - widget.min) + widget.min;
     final v = nextValue < widget.minValue ? widget.minValue : nextValue;
-    widget.onMaxChanged(v);
+    widget.onMaxChanged!(v);
   }
 
   @override
@@ -162,10 +158,10 @@ class _CupertinoRangeSliderState extends State<CupertinoRangeSlider>
 
 class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSliderRenderObjectWidget({
-    Key key,
+    Key? key,
     //this.value,
-    this.minValue,
-    this.maxValue,
+    required this.minValue,
+    required this.maxValue,
     this.divisions,
     this.activeColor,
     this.trackColor,
@@ -178,13 +174,13 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   //final double value;
   final double minValue;
   final double maxValue;
-  final int divisions;
-  final Color activeColor;
-  final Color trackColor;
-  final Color thumbColor;
-  final ValueChanged<double> onMinChanged;
-  final ValueChanged<double> onMaxChanged;
-  final TickerProvider vsync;
+  final int? divisions;
+  final Color? activeColor;
+  final Color? trackColor;
+  final Color? thumbColor;
+  final ValueChanged<double>? onMinChanged;
+  final ValueChanged<double>? onMaxChanged;
+  final TickerProvider? vsync;
 
   @override
   _RenderCupertinoSlider createRenderObject(BuildContext context) {
@@ -197,7 +193,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       thumbColor: thumbColor,
       onMinChanged: onMinChanged,
       onMaxChanged: onMaxChanged,
-      vsync: vsync,
+      vsync: vsync!,
       textDirection: Directionality.of(context),
     );
   }
@@ -231,19 +227,18 @@ const double _kAdjustmentUnit = .1; // Matches iOS implementation of material sl
 
 class _RenderCupertinoSlider extends RenderConstrainedBox {
   _RenderCupertinoSlider({
-    @required double minValue,
-    @required double maxValue,
-    int divisions,
-    Color activeColor,
-    Color trackColor,
-    Color thumbColor,
-    ValueChanged<double> onMinChanged,
-    ValueChanged<double> onMaxChanged,
-    TickerProvider vsync,
-    @required TextDirection textDirection,
-  })  : assert(minValue != null && minValue >= 0.0 && minValue <= 1.0),
-        assert(maxValue != null && maxValue >= 0.0 && maxValue <= 1.0),
-        assert(textDirection != null),
+    required double minValue,
+    required double maxValue,
+    int? divisions,
+    Color? activeColor,
+    Color? trackColor,
+    Color? thumbColor,
+    ValueChanged<double>? onMinChanged,
+    ValueChanged<double>? onMaxChanged,
+    required TickerProvider vsync,
+    required TextDirection textDirection,
+  })  : assert(minValue >= 0.0 && minValue <= 1.0),
+        assert(maxValue >= 0.0 && maxValue <= 1.0),
         _minValue = minValue,
         _maxValue = maxValue,
         _divisions = divisions,
@@ -281,7 +276,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double _maxValue;
 
   set minValue(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
+    assert(newValue >= 0.0 && newValue <= 1.0);
     if (newValue == _minValue) return;
     _minValue = newValue;
     if (divisions != null)
@@ -291,7 +286,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   }
 
   set maxValue(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
+    assert(newValue >= 0.0 && newValue <= 1.0);
     if (newValue == _maxValue) return;
     _maxValue = newValue;
     if (divisions != null)
@@ -300,56 +295,56 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       _maxPosition.value = newValue;
   }
 
-  int get divisions => _divisions;
-  int _divisions;
+  int? get divisions => _divisions;
+  int? _divisions;
 
-  set divisions(int value) {
+  set divisions(int? value) {
     if (value == _divisions) return;
     _divisions = value;
     markNeedsPaint();
   }
 
-  Color _activeColor;
-  Color get activeColor => _activeColor;
+  Color? _activeColor;
+  Color? get activeColor => _activeColor;
 
-  set activeColor(Color value) {
+  set activeColor(Color? value) {
     if (value == _activeColor) return;
     _activeColor = value;
     markNeedsPaint();
   }
 
-  Color _trackColor;
-  Color get trackColor => _activeColor;
+  Color? _trackColor;
+  Color? get trackColor => _activeColor;
 
-  set trackColor(Color value) {
+  set trackColor(Color? value) {
     if (value == _trackColor) return;
     _trackColor = value;
     markNeedsPaint();
   }
 
-  Color _thumbColor;
-  Color get thumbColor => _activeColor;
+  Color? _thumbColor;
+  Color? get thumbColor => _activeColor;
 
-  set thumbColor(Color value) {
+  set thumbColor(Color? value) {
     if (value == _thumbColor) return;
     _thumbColor = value;
     markNeedsPaint();
   }
 
-  ValueChanged<double> get onMinChanged => _onMinChanged;
-  ValueChanged<double> _onMinChanged;
+  ValueChanged<double>? get onMinChanged => _onMinChanged;
+  ValueChanged<double>? _onMinChanged;
 
-  ValueChanged<double> get onMaxChanged => _onMaxChanged;
-  ValueChanged<double> _onMaxChanged;
+  ValueChanged<double>? get onMaxChanged => _onMaxChanged;
+  ValueChanged<double>? _onMaxChanged;
 
-  set onMinChanged(ValueChanged<double> value) {
+  set onMinChanged(ValueChanged<double>? value) {
     if (value == _onMinChanged) return;
     final bool wasInteractive = isInteractive;
     _onMinChanged = value;
     if (wasInteractive != isInteractive) markNeedsSemanticsUpdate();
   }
 
-  set onMaxChanged(ValueChanged<double> value) {
+  set onMaxChanged(ValueChanged<double>? value) {
     if (value == _onMaxChanged) return;
     final bool wasInteractive = isInteractive;
     _onMaxChanged = value;
@@ -360,23 +355,22 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   TextDirection _textDirection;
 
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) return;
     _textDirection = value;
     markNeedsPaint();
   }
 
-  AnimationController _minPosition;
-  AnimationController _maxPosition;
+  late AnimationController _minPosition;
+  late AnimationController _maxPosition;
 
-  HorizontalDragGestureRecognizer _drag;
+  late HorizontalDragGestureRecognizer _drag;
   double _currentDragValue = 0.0;
   int pickedThumb = 123;
 
   double get _discretizedCurrentDragValue {
     double dragValue = _currentDragValue.clamp(0.0, 1.0);
     if (divisions != null)
-      dragValue = (dragValue * divisions).round() / divisions;
+      dragValue = (dragValue * divisions!).round() / divisions!;
     return dragValue;
   }
 
@@ -384,8 +378,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   double get _trackRight => size.width - _kPadding;
 
-  double get _minThumbCenter {
-    double visualPosition;
+  double? get _minThumbCenter {
+    double? visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _minValue;
@@ -398,8 +392,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         _trackRight - CupertinoThumbPainter.radius, visualPosition);
   }
 
-  double get _maxThumbCenter {
-    double visualPosition;
+  double? get _maxThumbCenter {
+    double? visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _maxValue;
@@ -418,9 +412,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     if (isInteractive) {
       _currentDragValue = pickedThumb == _kMinThumb ? _minValue : _maxValue;
       if (pickedThumb == _kMinThumb) {
-        onMinChanged(_discretizedCurrentDragValue);
+        onMinChanged!(_discretizedCurrentDragValue);
       } else {
-        onMaxChanged(_discretizedCurrentDragValue);
+        onMaxChanged!(_discretizedCurrentDragValue);
       }
     }
   }
@@ -429,7 +423,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     if (isInteractive) {
       final double extent = math.max(_kPadding,
           size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
-      final double valueDelta = details.primaryDelta / extent;
+      final double valueDelta = details.primaryDelta! / extent;
       switch (textDirection) {
         case TextDirection.rtl:
           _currentDragValue -= valueDelta;
@@ -440,9 +434,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       }
 
       if (pickedThumb == _kMinThumb) {
-        onMinChanged(_discretizedCurrentDragValue);
+        onMinChanged!(_discretizedCurrentDragValue);
       } else {
-        onMaxChanged(_discretizedCurrentDragValue);
+        onMaxChanged!(_discretizedCurrentDragValue);
       }
     }
   }
@@ -456,23 +450,23 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     // If both thumbs are at the same place and at the start or the end
     if (_minThumbCenter == _maxThumbCenter) {
-      if (_minThumbCenter >= (size.width - CupertinoThumbPainter.radius + _kPadding)) {
+      if (_minThumbCenter! >= (size.width - CupertinoThumbPainter.radius + _kPadding)) {
         pickedThumb = _kMinThumb;
         return true;
-      } else if ((_minThumbCenter <= (CupertinoThumbPainter.radius + _kPadding)) ||
-          position.dx > _maxThumbCenter) {
+      } else if ((_minThumbCenter! <= (CupertinoThumbPainter.radius + _kPadding)) ||
+          position.dx > _maxThumbCenter!) {
         pickedThumb = _kMaxThumb;
         return true;
       }
     }
 
-    if ((position.dx - _minThumbCenter).abs() <
+    if ((position.dx - _minThumbCenter!).abs() <
         CupertinoThumbPainter.radius + _kPadding) {
       pickedThumb = _kMinThumb;
       return true;
     }
 
-    if ((position.dx - _maxThumbCenter).abs() <
+    if ((position.dx - _maxThumbCenter!).abs() <
         CupertinoThumbPainter.radius + _kPadding) {
       pickedThumb = _kMaxThumb;
       return true;
@@ -489,9 +483,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter(color: _thumbColor);
-    final Color betweenColor = _activeColor;
-    final Color aroundColor = _trackColor;
+    final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter(color: _thumbColor!);
+    final Color betweenColor = _activeColor!;
+    final Color aroundColor = _trackColor!;
 
     final double trackCenter = offset.dy + size.height / 2.0;
     final double trackLeft = offset.dx + _trackLeft;
@@ -499,8 +493,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     final double trackBottom = trackCenter + 1.0;
     final double trackRight = offset.dx + _trackRight;
 
-    final double trackMinActive = offset.dx + _minThumbCenter;
-    final double trackMaxActive = offset.dx + _maxThumbCenter;
+    final double trackMinActive = offset.dx + _minThumbCenter!;
+    final double trackMaxActive = offset.dx + _maxThumbCenter!;
 
     final Canvas canvas = context.canvas;
     final Paint paint = Paint();
@@ -543,14 +537,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   }
 
   double get _semanticActionUnit =>
-      divisions != null ? 1.0 / divisions : _kAdjustmentUnit;
+      divisions != null ? 1.0 / divisions! : _kAdjustmentUnit;
 
   void _increaseAction() {
     if (isInteractive) {
       if (pickedThumb == _kMinThumb) {
-        onMinChanged((minValue + _semanticActionUnit).clamp(0.0, 1.0));
+        onMinChanged!((minValue + _semanticActionUnit).clamp(0.0, 1.0));
       } else {
-        onMaxChanged((maxValue + _semanticActionUnit).clamp(0.0, 1.0));
+        onMaxChanged!((maxValue + _semanticActionUnit).clamp(0.0, 1.0));
       }
     }
   }
@@ -558,9 +552,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   void _decreaseAction() {
     if (isInteractive) {
       if (pickedThumb == _kMinThumb) {
-        onMinChanged((minValue - _semanticActionUnit).clamp(0.0, 1.0));
+        onMinChanged!((minValue - _semanticActionUnit).clamp(0.0, 1.0));
       } else {
-        onMaxChanged((maxValue - _semanticActionUnit).clamp(0.0, 1.0));
+        onMaxChanged!((maxValue - _semanticActionUnit).clamp(0.0, 1.0));
       }
     }
   }
