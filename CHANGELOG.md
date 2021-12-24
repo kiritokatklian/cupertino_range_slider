@@ -1,3 +1,8 @@
+## 2.0.1
+
+Update Formatting.
+* Ran `flutter format .` to fix formatting
+
 ## 2.0.0
 
 Upgrade to SDK 2+.
