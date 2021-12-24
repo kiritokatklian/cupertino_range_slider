@@ -35,19 +35,19 @@ class CupertinoRangeSlider extends StatefulWidget {
   /// Creates an iOS-style slider.
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
-  const CupertinoRangeSlider({
-    Key? key,
-    required this.minValue,
-    required this.maxValue,
-    this.onMinChanged,
-    this.onMaxChanged,
-    this.min: 0.0,
-    this.max: 1.0,
-    this.divisions,
-    this.activeColor: CupertinoColors.activeBlue,
-    this.trackColor: const Color(0xFFB5B5B5),
-    this.thumbColor: const Color(0xFFFFFFFF)
-  })  : assert(minValue >= min && maxValue <= max && minValue <= maxValue),
+  const CupertinoRangeSlider(
+      {Key? key,
+      required this.minValue,
+      required this.maxValue,
+      this.onMinChanged,
+      this.onMaxChanged,
+      this.min: 0.0,
+      this.max: 1.0,
+      this.divisions,
+      this.activeColor: CupertinoColors.activeBlue,
+      this.trackColor: const Color(0xFFB5B5B5),
+      this.thumbColor: const Color(0xFFFFFFFF)})
+      : assert(minValue >= min && maxValue <= max && minValue <= maxValue),
         assert(divisions == null || divisions > 0),
         super(key: key);
 
@@ -220,10 +220,11 @@ const double _kPadding = 8.0;
 const int _kMinThumb = 1;
 const int _kMaxThumb = 2;
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
-const double _kSliderWidth = 176.0; // Matches Material Design slider.
+// Matches Material Design slider.
+const double _kSliderWidth = 176.0;
 const Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
-
-const double _kAdjustmentUnit = .1; // Matches iOS implementation of material slider.
+// Matches iOS implementation of material slider.
+const double _kAdjustmentUnit = 0.1;
 
 class _RenderCupertinoSlider extends RenderConstrainedBox {
   _RenderCupertinoSlider({
@@ -248,8 +249,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         _onMinChanged = onMinChanged,
         _onMaxChanged = onMaxChanged,
         _textDirection = textDirection,
-        super(additionalConstraints: const BoxConstraints.tightFor(
-              width: _kSliderWidth, height: _kSliderHeight)) {
+        super(
+            additionalConstraints: const BoxConstraints.tightFor(
+                width: _kSliderWidth, height: _kSliderHeight)) {
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
@@ -447,13 +449,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   @override
   bool hitTestSelf(Offset position) {
-
     // If both thumbs are at the same place and at the start or the end
     if (_minThumbCenter == _maxThumbCenter) {
-      if (_minThumbCenter! >= (size.width - CupertinoThumbPainter.radius + _kPadding)) {
+      if (_minThumbCenter! >=
+          (size.width - CupertinoThumbPainter.radius + _kPadding)) {
         pickedThumb = _kMinThumb;
         return true;
-      } else if ((_minThumbCenter! <= (CupertinoThumbPainter.radius + _kPadding)) ||
+      } else if ((_minThumbCenter! <=
+              (CupertinoThumbPainter.radius + _kPadding)) ||
           position.dx > _maxThumbCenter!) {
         pickedThumb = _kMaxThumb;
         return true;
@@ -483,7 +486,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter(color: _thumbColor!);
+    final CupertinoThumbPainter _thumbPainter =
+        CupertinoThumbPainter(color: _thumbColor!);
     final Color betweenColor = _activeColor!;
     final Color aroundColor = _trackColor!;
 
@@ -501,15 +505,15 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     paint.color = aroundColor;
     canvas.drawRRect(
-      RRect.fromLTRBXY(
-        trackLeft, trackTop, trackRight, trackBottom, 1.0, 1.0),
-      paint);
+        RRect.fromLTRBXY(
+            trackLeft, trackTop, trackRight, trackBottom, 1.0, 1.0),
+        paint);
 
     paint.color = betweenColor;
     canvas.drawRRect(
-      RRect.fromLTRBXY(
-        trackMinActive, trackTop, trackMaxActive, trackBottom, 1.0, 1.0),
-      paint);
+        RRect.fromLTRBXY(
+            trackMinActive, trackTop, trackMaxActive, trackBottom, 1.0, 1.0),
+        paint);
 
     final Offset minThumbCenter = Offset(trackMinActive, trackCenter);
     final Offset maxThumbCenter = Offset(trackMaxActive, trackCenter);
@@ -517,12 +521,12 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     _thumbPainter.paint(
         canvas,
         Rect.fromCircle(
-          center: minThumbCenter, radius: CupertinoThumbPainter.radius));
+            center: minThumbCenter, radius: CupertinoThumbPainter.radius));
 
     _thumbPainter.paint(
         canvas,
         Rect.fromCircle(
-          center: maxThumbCenter, radius: CupertinoThumbPainter.radius));
+            center: maxThumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override

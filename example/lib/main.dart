@@ -33,29 +33,29 @@ class MyHomePage extends StatelessWidget {
               title: 'Happiness',
               initialMinValue: 20,
               initialMaxValue: 80,
-              onMinValueChanged: (v){},
-              onMaxValueChanged: (v){},
+              onMinValueChanged: (v) {},
+              onMaxValueChanged: (v) {},
             ),
             RangeSliderItem(
               title: 'Kindness',
               initialMinValue: 55,
               initialMaxValue: 89,
-              onMinValueChanged: (v){},
-              onMaxValueChanged: (v){},
+              onMinValueChanged: (v) {},
+              onMaxValueChanged: (v) {},
             ),
             RangeSliderItem(
               title: 'Humor',
               initialMinValue: 40,
               initialMaxValue: 60,
-              onMinValueChanged: (v){},
-              onMaxValueChanged: (v){},
+              onMinValueChanged: (v) {},
+              onMaxValueChanged: (v) {},
             ),
             RangeSliderItem(
               title: 'Angerness',
               initialMinValue: 10,
               initialMaxValue: 30,
-              onMinValueChanged: (v){},
-              onMaxValueChanged: (v){},
+              onMinValueChanged: (v) {},
+              onMaxValueChanged: (v) {},
             ),
           ],
         ),
@@ -64,8 +64,6 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
-
-
 class RangeSliderItem extends StatefulWidget {
   final String title;
   final int initialMinValue;
@@ -73,7 +71,14 @@ class RangeSliderItem extends StatefulWidget {
   final ValueChanged<int> onMinValueChanged;
   final ValueChanged<int> onMaxValueChanged;
 
-  const RangeSliderItem({Key? key, required this.title, required this.initialMinValue, required this.initialMaxValue, required this.onMinValueChanged, required this.onMaxValueChanged}) : super(key: key);
+  const RangeSliderItem(
+      {Key? key,
+      required this.title,
+      required this.initialMinValue,
+      required this.initialMaxValue,
+      required this.onMinValueChanged,
+      required this.onMaxValueChanged})
+      : super(key: key);
 
   @override
   _RangeSliderItemState createState() => _RangeSliderItemState();
@@ -82,7 +87,6 @@ class RangeSliderItem extends StatefulWidget {
 class _RangeSliderItemState extends State<RangeSliderItem> {
   late int minValue;
   late int maxValue;
-
 
   @override
   void initState() {
@@ -101,13 +105,13 @@ class _RangeSliderItemState extends State<RangeSliderItem> {
         maxValue: maxValue.roundToDouble(),
         min: 1.0,
         max: 100.0,
-        onMinChanged: (minVal){
+        onMinChanged: (minVal) {
           setState(() {
             minValue = minVal.round();
             widget.onMinValueChanged(minValue);
           });
         },
-        onMaxChanged: (maxVal){
+        onMaxChanged: (maxVal) {
           setState(() {
             maxValue = maxVal.round();
             widget.onMaxValueChanged(maxValue);
@@ -117,8 +121,6 @@ class _RangeSliderItemState extends State<RangeSliderItem> {
     );
   }
 }
-
-
 
 ///
 ///

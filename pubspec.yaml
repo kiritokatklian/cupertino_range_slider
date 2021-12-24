@@ -1,6 +1,6 @@
 name: cupertino_range_slider_improved
 description: An iOS style range slider that helps with choosing a range from a set of values.
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/kiritokatklian/cupertino_range_slider
 
 environment:
