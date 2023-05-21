@@ -1,5 +1,5 @@
+import 'package:cupertino_range_slider_improved/cupertino_range_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:cupertino_range_slider/cupertino_range_slider.dart';
 
 void main() => runApp(new MyApp());
 
@@ -105,6 +105,12 @@ class _RangeSliderItemState extends State<RangeSliderItem> {
         maxValue: maxValue.roundToDouble(),
         min: 1.0,
         max: 100.0,
+        trackHeight: 4,
+        trackRadius: 10,
+        thumbRadius: 32 / 2,
+        thumbShadows: [
+          BoxShadow(color: Color.fromRGBO(75, 75, 75, 0.15), blurRadius: 8)
+        ],
         onMinChanged: (minVal) {
           setState(() {
             minValue = minVal.round();

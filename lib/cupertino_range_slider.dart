@@ -12,6 +12,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+part 'cupertino_thumb_painter.dart';
+
 /// An iOS-style slider.
 ///
 /// Used to select from a range of values.
@@ -41,12 +43,16 @@ class CupertinoRangeSlider extends StatefulWidget {
       required this.maxValue,
       this.onMinChanged,
       this.onMaxChanged,
-      this.min: 0.0,
-      this.max: 1.0,
+      this.min = 0.0,
+      this.max = 1.0,
       this.divisions,
-      this.activeColor: CupertinoColors.activeBlue,
-      this.trackColor: const Color(0xFFB5B5B5),
-      this.thumbColor: const Color(0xFFFFFFFF)})
+      this.activeColor = CupertinoColors.activeBlue,
+      this.trackColor = const Color(0xFFB5B5B5),
+      this.thumbColor = const Color(0xFFFFFFFF),
+      this.trackHeight = _kTrackHeight,
+      this.trackRadius = _kTrackRadius,
+      this.thumbShadows = _kSliderBoxShadows,
+      this.thumbRadius = _kThumbRadius})
       : assert(minValue >= min && maxValue <= max && minValue <= maxValue),
         assert(divisions == null || divisions > 0),
         super(key: key);
@@ -111,6 +117,24 @@ class CupertinoRangeSlider extends StatefulWidget {
   /// The color to use for the left the thumb of the slider.
   final Color thumbColor;
 
+  /// The radius of the thumb.
+  ///
+  /// Default to 14.0.
+  final double thumbRadius;
+
+  /// The shadow of the thumb.2
+  final List<BoxShadow> thumbShadows;
+
+  /// The height of the track.
+  ///
+  /// Defaults to 2.0.
+  final double trackHeight;
+
+  /// The border radius of the track.
+  ///
+  /// Defaults to 1.0.
+  final double trackRadius;
+
   @override
   _CupertinoRangeSliderState createState() => new _CupertinoRangeSliderState();
 
@@ -152,6 +176,10 @@ class _CupertinoRangeSliderState extends State<CupertinoRangeSlider>
       onMinChanged: widget.onMinChanged != null ? _handleMinChanged : null,
       onMaxChanged: widget.onMaxChanged != null ? _handleMaxChanged : null,
       vsync: this,
+      trackHeight: widget.trackHeight,
+      trackRadius: widget.trackRadius,
+      thumbShadows: widget.thumbShadows,
+      thumbRadius: widget.thumbRadius,
     );
   }
 }
@@ -169,9 +197,14 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onMinChanged,
     this.onMaxChanged,
     this.vsync,
+    this.trackHeight,
+    this.trackRadius,
+    this.thumbShadows,
+    this.thumbRadius,
   }) : super(key: key);
 
   //final double value;
+
   final double minValue;
   final double maxValue;
   final int? divisions;
@@ -181,21 +214,28 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double>? onMinChanged;
   final ValueChanged<double>? onMaxChanged;
   final TickerProvider? vsync;
+  final double? trackHeight;
+  final double? trackRadius;
+  final List<BoxShadow>? thumbShadows;
+  final double? thumbRadius;
 
   @override
   _RenderCupertinoSlider createRenderObject(BuildContext context) {
     return new _RenderCupertinoSlider(
-      minValue: minValue,
-      maxValue: maxValue,
-      divisions: divisions,
-      activeColor: activeColor,
-      trackColor: trackColor,
-      thumbColor: thumbColor,
-      onMinChanged: onMinChanged,
-      onMaxChanged: onMaxChanged,
-      vsync: vsync!,
-      textDirection: Directionality.of(context),
-    );
+        minValue: minValue,
+        maxValue: maxValue,
+        divisions: divisions,
+        activeColor: activeColor,
+        trackColor: trackColor,
+        thumbColor: thumbColor,
+        onMinChanged: onMinChanged,
+        onMaxChanged: onMaxChanged,
+        vsync: vsync!,
+        textDirection: Directionality.of(context),
+        trackHeight: trackHeight,
+        trackRadius: trackRadius,
+        thumbShadows: thumbShadows,
+        thumbRadius: thumbRadius);
   }
 
   @override
@@ -210,7 +250,11 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..thumbColor = thumbColor
       ..onMinChanged = onMinChanged
       ..onMaxChanged = onMaxChanged
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..trackHeight = trackHeight
+      ..trackRadius = trackRadius
+      ..thumbShadows = thumbShadows
+      ..thumbRadius = thumbRadius;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -219,12 +263,13 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 const double _kPadding = 8.0;
 const int _kMinThumb = 1;
 const int _kMaxThumb = 2;
-const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 // Matches Material Design slider.
 const double _kSliderWidth = 176.0;
 const Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
 // Matches iOS implementation of material slider.
 const double _kAdjustmentUnit = 0.1;
+const double _kTrackRadius = 1;
+const double _kTrackHeight = 2;
 
 class _RenderCupertinoSlider extends RenderConstrainedBox {
   _RenderCupertinoSlider({
@@ -238,6 +283,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     ValueChanged<double>? onMaxChanged,
     required TickerProvider vsync,
     required TextDirection textDirection,
+    double? trackHeight,
+    double? trackRadius,
+    List<BoxShadow>? thumbShadows,
+    double? thumbRadius,
   })  : assert(minValue >= 0.0 && minValue <= 1.0),
         assert(maxValue >= 0.0 && maxValue <= 1.0),
         _minValue = minValue,
@@ -249,9 +298,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         _onMinChanged = onMinChanged,
         _onMaxChanged = onMaxChanged,
         _textDirection = textDirection,
+        _trackHeight = trackHeight,
+        _trackRadius = trackRadius,
+        _thumbShadows = thumbShadows,
+        _thumbRadius = thumbRadius,
         super(
-            additionalConstraints: const BoxConstraints.tightFor(
-                width: _kSliderWidth, height: _kSliderHeight)) {
+            additionalConstraints: BoxConstraints.tightFor(
+                width: _kSliderWidth,
+                height: 2.0 * (thumbRadius! + _kPadding))) {
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
@@ -362,6 +416,43 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
+  double? _trackHeight;
+  double? get trackHeight => _trackHeight;
+
+  set trackHeight(double? value) {
+    if (value == _trackHeight) return;
+    _trackHeight = value;
+    markNeedsPaint();
+  }
+
+  double? _trackRadius;
+  double? get trackRadius => _trackRadius;
+
+  set trackRadius(double? value) {
+
+    if (value == _trackRadius) return;
+    _trackRadius = value;
+    markNeedsPaint();
+  }
+
+  List<BoxShadow>? _thumbShadows;
+  List<BoxShadow>? get thumbShadows => _thumbShadows;
+
+  set thumbShadows(List<BoxShadow>? value) {
+    if (listEquals(value, thumbShadows)) return;
+    _thumbShadows = value;
+    markNeedsPaint();
+  }
+
+  double? _thumbRadius;
+  double? get thumbRadius => _thumbRadius ;
+
+  set thumbRadius(double? value) {
+    if (value == _thumbRadius) return;
+    _thumbRadius = value;
+    markNeedsPaint();
+  }
+
   late AnimationController _minPosition;
   late AnimationController _maxPosition;
 
@@ -390,8 +481,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         visualPosition = _minValue;
         break;
     }
-    return lerpDouble(_trackLeft + CupertinoThumbPainter.radius,
-        _trackRight - CupertinoThumbPainter.radius, visualPosition);
+    return lerpDouble(
+        _trackLeft + thumbRadius!, _trackRight - thumbRadius!, visualPosition);
   }
 
   double? get _maxThumbCenter {
@@ -404,8 +495,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
         visualPosition = _maxValue;
         break;
     }
-    return lerpDouble(_trackLeft + CupertinoThumbPainter.radius,
-        _trackRight - CupertinoThumbPainter.radius, visualPosition);
+    return lerpDouble(
+        _trackLeft + thumbRadius!, _trackRight - thumbRadius!, visualPosition);
   }
 
   bool get isInteractive => (onMinChanged != null && onMaxChanged != null);
@@ -423,8 +514,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      final double extent = math.max(_kPadding,
-          size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
+      final double extent =
+          math.max(_kPadding, size.width - 2.0 * (_kPadding + thumbRadius!));
       final double valueDelta = details.primaryDelta! / extent;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -451,26 +542,22 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   bool hitTestSelf(Offset position) {
     // If both thumbs are at the same place and at the start or the end
     if (_minThumbCenter == _maxThumbCenter) {
-      if (_minThumbCenter! >=
-          (size.width - CupertinoThumbPainter.radius + _kPadding)) {
+      if (_minThumbCenter! >= (size.width - thumbRadius! + _kPadding)) {
         pickedThumb = _kMinThumb;
         return true;
-      } else if ((_minThumbCenter! <=
-              (CupertinoThumbPainter.radius + _kPadding)) ||
+      } else if ((_minThumbCenter! <= (thumbRadius! + _kPadding)) ||
           position.dx > _maxThumbCenter!) {
         pickedThumb = _kMaxThumb;
         return true;
       }
     }
 
-    if ((position.dx - _minThumbCenter!).abs() <
-        CupertinoThumbPainter.radius + _kPadding) {
+    if ((position.dx - _minThumbCenter!).abs() < thumbRadius! + _kPadding) {
       pickedThumb = _kMinThumb;
       return true;
     }
 
-    if ((position.dx - _maxThumbCenter!).abs() <
-        CupertinoThumbPainter.radius + _kPadding) {
+    if ((position.dx - _maxThumbCenter!).abs() < thumbRadius! + _kPadding) {
       pickedThumb = _kMaxThumb;
       return true;
     }
@@ -486,47 +573,45 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final CupertinoThumbPainter _thumbPainter =
-        CupertinoThumbPainter(color: _thumbColor!);
     final Color betweenColor = _activeColor!;
     final Color aroundColor = _trackColor!;
-
+    final double trackHeight = _trackHeight!;
     final double trackCenter = offset.dy + size.height / 2.0;
     final double trackLeft = offset.dx + _trackLeft;
-    final double trackTop = trackCenter - 1.0;
-    final double trackBottom = trackCenter + 1.0;
+    final double trackTop = trackCenter - (trackHeight / 2);
+    final double trackBottom = trackCenter + (trackHeight / 2);
     final double trackRight = offset.dx + _trackRight;
 
     final double trackMinActive = offset.dx + _minThumbCenter!;
     final double trackMaxActive = offset.dx + _maxThumbCenter!;
+    final double trackRadius = _trackRadius!;
+    final List<BoxShadow> boxShadows = _thumbShadows!;
 
     final Canvas canvas = context.canvas;
     final Paint paint = Paint();
 
     paint.color = aroundColor;
     canvas.drawRRect(
-        RRect.fromLTRBXY(
-            trackLeft, trackTop, trackRight, trackBottom, 1.0, 1.0),
+        RRect.fromLTRBXY(trackLeft, trackTop, trackRight, trackBottom,
+            trackRadius, trackRadius),
         paint);
 
     paint.color = betweenColor;
     canvas.drawRRect(
-        RRect.fromLTRBXY(
-            trackMinActive, trackTop, trackMaxActive, trackBottom, 1.0, 1.0),
+        RRect.fromLTRBXY(trackMinActive, trackTop, trackMaxActive, trackBottom,
+            trackRadius, trackRadius),
         paint);
 
     final Offset minThumbCenter = Offset(trackMinActive, trackCenter);
     final Offset maxThumbCenter = Offset(trackMaxActive, trackCenter);
 
+    final _SliderThumbPainter _thumbPainter = _SliderThumbPainter(
+        color: _thumbColor!, radius: trackRadius, shadows: boxShadows);
     _thumbPainter.paint(
-        canvas,
-        Rect.fromCircle(
-            center: minThumbCenter, radius: CupertinoThumbPainter.radius));
+        canvas, Rect.fromCircle(center: minThumbCenter, radius: thumbRadius!));
 
     _thumbPainter.paint(
-        canvas,
-        Rect.fromCircle(
-            center: maxThumbCenter, radius: CupertinoThumbPainter.radius));
+        canvas, Rect.fromCircle(center: maxThumbCenter, radius: thumbRadius!));
   }
 
   @override
